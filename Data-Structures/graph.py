@@ -1,8 +1,13 @@
 from collections import OrderedDict
+from pprint import pprint
+from pdb import set_trace as st
 choiceDict =None
+
 class Graph:
     def __init__(self):
         self.vertex = OrderedDict()
+        self.visitedNodes = OrderedDict()
+        self.dfsVisitedNodes = OrderedDict()
 
     def addEdge(self):
         fromVertex = input("ENTER THE FROM VERTEX")
@@ -11,10 +16,48 @@ class Graph:
             self.vertex[fromVertex].append(toVertex)
         else:
             self.vertex[fromVertex] = [toVertex]
+        print ("\n\nGRAPH -> ")
+        pprint(self.vertex)
+        print("\n")
+
+    def detectCycle(self):
+
+        # Marked all nodes as visited, dfsVisited as False
+        for node in self.vertex:
+            self.visitedNodes[node]       = False
+            self.dfsVisitedNodes[node] = False
+            for toNode in self.vertex[node]:
+                self.visitedNodes[toNode]       = False
+                self.dfsVisitedNodes[toNode]       = False
+
+        for node in self.vertex:
+            if self.visitedNodes[node] == False:
+                if self.isCyclic(node):
+                    print ("Graph has a cycle")
+                    return True
+        print("Graph has a NO CYCLE")
+        return False
+
+    def isCyclic(self, node):
+        self.visitedNodes[node] = True
+        self.dfsVisitedNodes[node] = True
+        if node in self.vertex:
+            for neighbour in self.vertex[node]:
+                    if neighbour  in self.visitedNodes and  self.visitedNodes[neighbour] == False:
+                        if self.isCyclic(neighbour):
+                            return True
+                    elif self.dfsVisitedNodes[neighbour] == True:
+                        # Cycle detected , as 'DFS visited' is true
+                        return True
+        self.dfsVisitedNodes[node] = False
+        return False
 
     def displayGraph(self):
         for vertex  in self.vertex.keys():
             print(vertex, ' -> [', ' -> '.join([str(j) for j in self.vertex[vertex]]),']')
+
+    def deleteGraph(self):
+        self.vertex = OrderedDict()
 
 def main():
 
@@ -23,13 +66,18 @@ def main():
     choiceDict = {
         1: graph.addEdge,
         2: graph.displayGraph,
-        3: exit
+        3: graph.detectCycle,
+        4: graph.deleteGraph,
+        5: exit
     }
     while(1):
         print("\t\t1: Insert edge in the graph\n")
         print("\t\t2: Display graph\n")
+        print("\t\t3: Detect cycle\n")
+        print("\t\t4: Delete Graph\n")
+        print("\t\t5: Exit\n")
         choice = int(input("Choice:"))
-        choiceDict[choice]()
+        retVal = choiceDict[choice]()
 
 
 
